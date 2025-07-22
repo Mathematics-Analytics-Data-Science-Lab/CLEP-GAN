@@ -1,0 +1,28 @@
+sampling:
+  org_rate: 125
+
+filters:
+  ecg:
+    lowcut: 0.4
+    highcut: 15
+    order: 6
+  ppg:
+    lowcut: 0.3
+    highcut: 8
+    order: 3
+
+ODE:
+  A: 0.01
+  B: [0.5, 0.5, 1.5]
+  f: [0.1, 0.15]
+  thei: [-1.365, -0.698, -0.523, 0, 0.523, 0.698, 2.243, 3.49]
+  ai: [3.5, 2.0, -10.0, 25.0, -6.0, 2.0, 2.2, 1.0]
+  bi: [0.2, 0.1, 0.1, 0.15, 0.1, 0.2, 0.4, 0.4]
+  u0: [0.7071, 0.7071, 0.2, 0.005, 0]
+  beatPerSec: 10
+  randomization:
+    std: 0.1
+    percent: 0.3
+
+filepaths:
+  input: "./data/real_data/bidmc/csv/bidmc_07_Signals.csv"

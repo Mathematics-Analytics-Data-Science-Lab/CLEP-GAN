@@ -1,32 +1,26 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import os
 import torch
 import numpy as np
 from torch.utils.data import Dataset
 import torch.nn.functional as F
 from torch import nn
+from scipy.signal import butter
 import matplotlib.pyplot as plt
 from biosppy.signals import ecg
 from scipy import stats as st
 
-    
 class MyDataset_(Dataset):
     def __init__(self, data, target, label, transform=None):
         self.data = data
         self.target = target
         self.label = label
-
     def __getitem__(self, index):
         x = self.data[index]
         y = self.target[index]
         labl = self.label[index]
         return x, y, labl
-    
     def __len__(self):
         return len(self.data)
 
- 
 def rpeak_detection(ecg_data, sampling_rate=100.):
     # rpeak segmentation for ori_ecg
     rpeaks, = ecg.hamilton_segmenter(
@@ -89,7 +83,6 @@ class ECGDataset(Dataset):
         rpeaks_new = torch.from_numpy(
             new_rpeaks.reshape(1, -1)).type(torch.LongTensor)        
         
-  
         return {'ppg': ppg,
                 'ecg': ecg,
                 'label':labl,
@@ -106,11 +99,8 @@ class QRSLoss(nn.Module):
     def forward(self, input, target, exp_rpeaks):
         loss = F.l1_loss(
             input*(1+self.beta*exp_rpeaks), target*(1+self.beta*exp_rpeaks))
-    
         return loss
     
-
-
 def plot_losses(path, trainer):
     plt.figure(figsize=(12, 5))
     plt.title("Errors in Training")
@@ -123,21 +113,17 @@ def plot_losses(path, trainer):
     plt.plot(trainer.test_GE_errors, label='ECG Generator (testing)')
     plt.plot(trainer.test_GP_errors, label='PPG Generator (testing)')  
     
-    
     plt.xlabel("Epochs")
     plt.ylabel('Error')
     plt.legend()
     plt.savefig(path+'Losses.png', facecolor='w', edgecolor='w', format='png',
             transparent=False, bbox_inches='tight', pad_inches=0.1)
-    
-    
+        
 def min_max_normalize(signal):
     min_value = np.min(signal)
     max_value = np.max(signal)
-
     normalized_signal = (signal - min_value) / (max_value - min_value)
     normalized_signal = normalized_signal * 2 - 1
-
     return normalized_signal
 
 def calculate_PRD(orig_sig, recon_sig):
@@ -155,7 +141,6 @@ def calculate_RMSE(orig_sig, recon_sig):
     return rmse
 
 def overlap(x_data, y_data):
-
     x = []
     y = []
     n_lap = 2
@@ -165,7 +150,6 @@ def overlap(x_data, y_data):
         y.append(y_data[n*(ws-n_lap):n*(ws-n_lap)+ws])
     x = np.asarray(x)
     y = np.asarray(y)
-
     return x.reshape((-1, ws*x.shape[-1])), y.reshape((-1, ws*x.shape[-1]))
    
 def de_overlap(data, seg_len):
@@ -178,6 +162,12 @@ def smoothl1_loss(signal1, signal2):
     loss = nn.SmoothL1Loss(reduction='mean')(signal1, signal2)
     return loss
 
-# Define the Wasserstein loss
 def wasserstein_loss(y_pred, y_true):
-    return torch.mean(y_true * y_pred)        
+    return torch.mean(y_true * y_pred)       
+
+def butter_bandpass(lowcut, highcut,fs, order=5):
+    nyq = 0.5 * fs
+    low = lowcut / nyq
+    high = highcut / nyq
+    b, a = butter(order, [low, high], btype='band')
+    return b, a  
