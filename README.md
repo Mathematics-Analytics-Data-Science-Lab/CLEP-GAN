@@ -9,7 +9,7 @@ Preprocess raw physiological signals before training or evaluation:
 data_processing.py
 ```
 
-### 2. Synthetic PPG-ECG Generation
+### 2. Synthetic PPG-ECG Generation:
 Generate synthetic paired data using the proposed ODE model
 
 ```bash
