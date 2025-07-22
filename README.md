@@ -7,16 +7,17 @@ Preprocess raw physiological signals before training or evaluation:
 
 ```bash
 data_processing.py
-
+```
 
 ### 2. Synthetic PPG-ECG Generation
 Generate synthetic paired data using the proposed ODE model
 
 ```bash
 python synthetic_data_generation.py
-
+```
 ### 3. PPG-to-ECG Transformation with CLEP-GAN
 Train or evaluate the CLEP-GAN model on the processed data:
 
 ```bash
 python CLEP-GAN.py
+```
