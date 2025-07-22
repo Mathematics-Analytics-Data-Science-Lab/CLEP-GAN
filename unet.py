@@ -1,14 +1,10 @@
-# -*- coding: utf-8 -*-
 import torch
 import torch.nn as nn
 import torch.nn.functional 
 
-    
-
 class TimeDomainDiscriminator(nn.Module):
     def __init__(self):
         super(TimeDomainDiscriminator, self).__init__()
-
         def discriminator_block(in_filters, out_filters, out_shape=None, normalize=True):
             layers = [nn.Conv1d(in_filters, out_filters, 16, stride=2, padding=7)]
             if normalize:
@@ -26,25 +22,20 @@ class TimeDomainDiscriminator(nn.Module):
         
     def forward(self, x):
         x = x.unsqueeze(1)
-        # print("x.shape=",x.shape)
-        # print("self.model[:](x).shape=",self.model[:](x).shape)
         out = self.model(x)
         out = out.squeeze()
         out = torch.sigmoid(out)
         return out
  
-
 class FrequencyDomainDiscriminator(nn.Module):
     def __init__(self):
         super(FrequencyDomainDiscriminator, self).__init__()
-
         def discriminator_block(in_filters, out_filters, out_shape=None, normalize=True):
             layers = [nn.Conv2d(in_filters, out_filters, 7, stride=2, padding=3)]
             if normalize:
                 layers.append(nn.LayerNorm([out_filters, out_shape[0], out_shape[1]]))
             layers.append(nn.LeakyReLU(0.2, inplace=True))
             return layers
-
         self.model = nn.Sequential(
             *discriminator_block(1, 64, normalize=False),  # first layer no normalization
             *discriminator_block(64, 128, out_shape=(32, 33)),
@@ -62,12 +53,9 @@ class FrequencyDomainDiscriminator(nn.Module):
         x = torch.log(abs(stft)+theta)
         x = x.unsqueeze(1) 
         out = self.model(x)
-
         out = out.squeeze()
         out = torch.sigmoid(out)
         return out
-    
-
     
 def Conv1D_(in_channels, out_channel, ksize, strides=1, padding=0, activation=None, use_bias=True):
     op = nn.Conv2d(in_channels=in_channels, out_channels=out_channel, kernel_size=(1, ksize), stride=(1, strides), padding=(0,padding))
@@ -94,7 +82,6 @@ class DownSample(nn.Module):
         if self.norm:
             layers.append(self.BatchNorm2d(self.fsize).to(self.device))
         layers.append(self.activation.to(self.device))
-      
         return nn.Sequential(*layers)(x)
     
 class Upsample(nn.Module):
@@ -110,18 +97,14 @@ class Upsample(nn.Module):
         self.device = device
     def forward(self, x):
         layers = []
-     
         layers.append(self.DeConv1D)
         if self.norm:
             layers.append(self.BatchNorm2d(self.fsize).to(self.device) )
         if self.apply_dropout:
             layers.append(self.dropput)
         layers.append(nn.ReLU())
-        
         return nn.Sequential(*layers)(x)
     
-    
-
 class attention_block_1d(nn.Module):
     def __init__(self, inter_channel, Conv1D_):
         super(attention_block_1d, self).__init__()  
@@ -144,11 +127,8 @@ class attention_block_1d(nn.Module):
         rate = self.activation(psi_f)
         att_x = x2 * rate
         att_x = att_x.permute((0,2,3,1))
-        
         return att_x, rate
-        
-
-
+  
 class generator_atten_unet(nn.Module):
     def __init__(self, device, input_channel, filter_size, kernel_size, norm=True, n_downsample=6, skip_connection=True):
         super(generator_atten_unet, self).__init__()
@@ -159,7 +139,6 @@ class generator_atten_unet(nn.Module):
         self.skip_connection = skip_connection
         self.filter_size = filter_size
         self.kernel_size = kernel_size
-
         self.Downsample_k0 = DownSample(self.device, self.input_channel, self.filter_size[0], self.kernel_size[0], norm=False)
         downsamples = []
         for n in range(1, self.n_downsample):  
@@ -190,12 +169,11 @@ class generator_atten_unet(nn.Module):
         self.proj1 = nn.Linear(256, 512*15).to(self.device)
         self.proj2 = nn.Linear(256, 512*31).to(self.device)
         self.proj3 = nn.Linear(256, 512*63).to(self.device)
-        
-        
+           
     def forward(self, x):
         x = x.unsqueeze(1)
         x = x.unsqueeze(2)  # Add a dimension for height
-     
+        
         # downsample
         connections = []
         for k in range(self.n_downsample):
@@ -222,10 +200,8 @@ class generator_atten_unet(nn.Module):
         x = nn.Tanh()(x)
         x = x.squeeze(1)
         out = x.squeeze(1)
-
         return out, connections, x_weight
     
-        
     def encode(self, x):
         x = x.unsqueeze(1)
         x = x.unsqueeze(2)  
@@ -239,7 +215,6 @@ class generator_atten_unet(nn.Module):
                 x = self.Downsample_kn[k-1](x)
             connections.append(x)
         xz_weight = [self.proj2.weight,self.proj1.weight,self.proj0.weight]
-        
         return connections, xz_weight
 
     def generate(self, connections):
@@ -260,5 +235,4 @@ class generator_atten_unet(nn.Module):
         x = nn.Tanh()(x)
         x = x.squeeze(1)
         out = x.squeeze(1)
-        
         return out, rate  
