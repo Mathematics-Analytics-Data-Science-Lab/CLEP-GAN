@@ -142,11 +142,15 @@ if __name__ == "__main__":
     name_ids3 = ['12','14','17','27','35','38','40','47','48']
     name_ids = name_ids1 + name_ids2 + name_ids3
     
-    # Global settings
-    seg_len = 128
-    org_samp_rate = 125
-    data_dir = './data/real_data/bidmc/csv'
-    out_root = './data/bidmc/processed'
+    config_file = "preprocessing_config.yaml"
+    with open(config_file, "r") as f:
+        config = yaml.safe_load(f)
+    
+    seg_len = config["global_settings"]["seg_len"]
+    org_samp_rate = config["global_settings"]["org_samp_rate"]
+    data_dir = config["global_settings"]["data_dir"]
+    out_root = config["global_settings"]["out_root"]
+
 
     for name_id in name_ids:
         # Prepare file paths
@@ -170,7 +174,7 @@ if __name__ == "__main__":
         ppg = signal.filtfilt(b, a, ppg)
 
         # Synchronize and clean
-        ecg, ppg, times = synchronize_real(ecg, ppg, times, name_id)
+        ecg, ppg, times = synchronize_real(ecg, ppg, times, name_id, config_file)
 
         # Segment normalized windows
         ecg_seg, ppg_seg, labels = get_segments([ecg], [ppg], name=name_id, window=seg_len)
