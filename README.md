@@ -18,8 +18,9 @@ pip install -r requirements.txt
 Preprocess raw physiological signals before training or evaluation:
 
 ```bash
-data_processing.py
+python data_processing.py --config preprocessing_config.yaml
 ```
+- Customize `preprocessing_config.yaml` to set data paths and hyperparameters.
 
 ### 2. Synthetic PPG-ECG Generation:
 Generate synthetic paired data using the proposed ODE model
