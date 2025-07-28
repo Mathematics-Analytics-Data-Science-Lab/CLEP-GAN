@@ -8,6 +8,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from utils import min_max_normalize, butter_bandpass
 import yaml
+import argparse
 
 def remove_noise(ecg, ppg, times, peaks, intervs):
     ecg = ecg.copy()
@@ -137,14 +138,20 @@ def get_segments(ecg_list, ppg_list, name=None, window=200):
 
 if __name__ == "__main__":
     # Define subject list
+    parser = argparse.ArgumentParser(description="ECG/PPG Preprocessing")
+    parser.add_argument("--config", type=str, default="preprocessing_config.yaml", help="Path to preprocessing_config.yaml")
+    args = parser.parse_args()
+    
+    config_file = args.config
+    with open(config_file, "r") as f:
+        config = yaml.safe_load(f)
+    
     name_ids1 = ['07','08','09','16','22','30','34','37','42','43','50','51']
     name_ids2 = ['01','02','05','11','18','19','20','21','24','29','46']
     name_ids3 = ['12','14','17','27','35','38','40','47','48']
     name_ids = name_ids1 + name_ids2 + name_ids3
     
-    config_file = "preprocessing_config.yaml"
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
+    name_ids = ['07']
     
     seg_len = config["global_settings"]["seg_len"]
     org_samp_rate = config["global_settings"]["org_samp_rate"]
