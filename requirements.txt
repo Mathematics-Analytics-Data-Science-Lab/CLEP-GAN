@@ -1,0 +1,21 @@
+# requirements.txt for CLEP-GAN
+
+# Core scientific and data libraries
+numpy
+pandas
+matplotlib
+scipy
+PyYAML
+argparse
+
+# PyTorch (adjust CUDA version as needed)
+torch
+torchvision
+torchaudio
+
+# Signal processing and ECG tools
+biosppy
+
+# If using specific CUDA version, you can specify like this:
+# torch==2.1.0+cu121
+# --find-links https://download.pytorch.org/whl/torch_stable.html
