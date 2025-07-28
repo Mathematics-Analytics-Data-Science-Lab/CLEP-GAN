@@ -151,8 +151,6 @@ if __name__ == "__main__":
     name_ids3 = ['12','14','17','27','35','38','40','47','48']
     name_ids = name_ids1 + name_ids2 + name_ids3
     
-    name_ids = ['07']
-    
     seg_len = config["global_settings"]["seg_len"]
     org_samp_rate = config["global_settings"]["org_samp_rate"]
     data_dir = config["global_settings"]["data_dir"]
