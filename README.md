@@ -6,7 +6,7 @@
 - See `requirements.txt` for Python package dependencies
   
 ## Installation
-Create a virtual environment and install dependencies:
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
